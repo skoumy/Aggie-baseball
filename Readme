@@ -1,0 +1,69 @@
+# Texas A&M Baseball — Live
+
+A mobile-app-style live scoreboard for Texas A&M baseball, designed to mirror the feel of a native iOS sports app. Real-time score, inning, bases, count, at-bat, pitcher, win probability, play-by-play feed, linescore, and schedule. Powered by ESPN’s public (unofficial) API.
+
+## Features
+
+- **Live score card** with team logos, records, and a leader-highlight color
+- **Baseball diamond** that lights up bases in maroon/gold as runners reach
+- **Pip-style count**: filled dots for balls (3), strikes (2), and outs (2)
+- **Inning indicator** with top/bottom arrow + batting-team row highlight
+- **At-bat / pitching** boxes with current line stats
+- **Win probability bar** when ESPN exposes it
+- **Last play** quote pulled live
+- **Play-by-play feed** (newest first, scoring plays highlighted gold)
+- **Full linescore** (1–9, R/H/E)
+- **Schedule** with Upcoming / Recent tabs, W/L badges, tap to open ESPN gamecast
+
+Status pill in the header flips between `LIVE` (red, pulsing), `NEXT UP` / `FINAL` (gold), and `OFFLINE`.
+
+## Deploy to GitHub Pages
+
+1. Create a new repo — e.g. `aggie-baseball`.
+1. Drop `index.html`, `styles.css`, `app.js` into the repo root.
+1. Push to `main`.
+1. **Settings → Pages → Deploy from a branch → main / root** → Save.
+1. Site is live at `https://<username>.github.io/aggie-baseball/` in about a minute.
+
+No build step, no API key, no backend required.
+
+## Run locally
+
+```bash
+python3 -m http.server 8000
+# open http://localhost:8000
+```
+
+## How it works
+
+- Team: ESPN team ID `245` (Texas A&M Aggies). Edit `TEAM_ID` in `app.js` to follow a different team.
+- Two endpoints:
+  - `…/teams/245/schedule` — full season, used for game discovery + the Schedule section.
+  - `…/summary?event={id}` — rich live data: `situation`, `plays`, `winprobability`, fresh `competitors`.
+- Polls every 15s when a game is live, every 2 min otherwise. Auto-refreshes when you switch back to the tab.
+
+## Optional backend proxy
+
+`backend/server.js` is a tiny Express server that caches ESPN responses (10s for live data, 60s for the schedule). You only need it if ESPN ever blocks browser CORS or you want to reduce ESPN load.
+
+```bash
+cd backend
+npm install
+npm start  # :3000
+```
+
+Deploy on Render, Fly.io, Railway, etc., then in `app.js` set:
+
+```js
+const API_BASE = 'https://your-proxy.example.com';
+```
+
+## Customizing
+
+- **Colors:** CSS variables at the top of `styles.css` (`--maroon`, `--gold`, etc.).
+- **Team:** `TEAM_ID` in `app.js`. Browse IDs at `https://site.api.espn.com/apis/site/v2/sports/baseball/college-baseball/teams`.
+- **Refresh:** `POLL_LIVE` / `POLL_IDLE` in `app.js`.
+
+## Disclaimer
+
+Not affiliated with Texas A&M University, the SEC, or ESPN. Uses ESPN’s public undocumented endpoints — keep polling reasonable.
