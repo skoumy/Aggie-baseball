@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Aggies" />
+  <meta name="theme-color" content="#500000" />
+  <title>Texas A&amp;M Baseball</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Roboto+Mono:wght@400;500;600&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <header class="app-header">
+    <div class="header-inner">
+      <div class="team-badge">
+        <span class="badge-letter">A</span>
+        <span class="badge-letter mid">T</span>
+        <span class="badge-letter">M</span>
+      </div>
+      <h1 class="app-title">Texas A&amp;M Aggies</h1>
+      <div class="status-pill" id="status-pill">
+        <span class="dot"></span>
+        <span id="status-text">LOADING</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="app-main">
+
+    <!-- =================== GAME CARD =================== -->
+    <section class="game-card" id="game-card">
+      <div class="card-loading" id="card-loading">Loading game data…</div>
+
+      <div class="card-content" id="card-content" hidden>
+
+        <!-- Game header -->
+        <div class="game-header">
+          <div class="game-status-line" id="game-status-line">—</div>
+          <div class="game-meta-line" id="game-meta-line"></div>
+        </div>
+
+        <!-- Teams + score -->
+        <div class="teams-block">
+          <div class="team-row" id="away-row">
+            <img class="team-logo" id="away-logo" alt="" />
+            <div class="team-meta">
+              <div class="team-name" id="away-name">—</div>
+              <div class="team-record" id="away-record"></div>
+            </div>
+            <div class="team-score" id="away-score">—</div>
+          </div>
+
+          <div class="team-row" id="home-row">
+            <img class="team-logo" id="home-logo" alt="" />
+            <div class="team-meta">
+              <div class="team-name" id="home-name">—</div>
+              <div class="team-record" id="home-record"></div>
+            </div>
+            <div class="team-score" id="home-score">—</div>
+          </div>
+        </div>
+
+        <!-- Live situation panel -->
+        <div class="situation-panel" id="situation-panel" hidden>
+
+          <div class="situation-top">
+            <!-- Diamond -->
+            <div class="diamond-block">
+              <svg class="diamond-svg" viewBox="0 0 100 100" aria-label="Bases">
+                <rect id="base-2" class="base" x="42" y="14" width="16" height="16" transform="rotate(45 50 22)" />
+                <rect id="base-3" class="base" x="14" y="42" width="16" height="16" transform="rotate(45 22 50)" />
+                <rect id="base-1" class="base" x="70" y="42" width="16" height="16" transform="rotate(45 78 50)" />
+                <rect class="base home-plate" x="42" y="70" width="16" height="16" transform="rotate(45 50 78)" />
+              </svg>
+            </div>
+
+            <!-- Count + outs -->
+            <div class="count-block">
+              <div class="count-row">
+                <span class="count-label">B</span>
+                <span class="count-dots" id="ball-dots"></span>
+              </div>
+              <div class="count-row">
+                <span class="count-label">S</span>
+                <span class="count-dots" id="strike-dots"></span>
+              </div>
+              <div class="count-row">
+                <span class="count-label">O</span>
+                <span class="count-dots" id="out-dots"></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Inning indicator -->
+          <div class="inning-indicator" id="inning-indicator">
+            <span class="inning-arrow" id="inning-arrow">▲</span>
+            <span class="inning-text" id="inning-text">—</span>
+          </div>
+
+          <!-- Win probability (when available) -->
+          <div class="winprob-block" id="winprob-block" hidden>
+            <div class="winprob-row">
+              <span class="winprob-team" id="wp-away-name">—</span>
+              <span class="winprob-value" id="wp-away-value">—</span>
+            </div>
+            <div class="winprob-bar">
+              <div class="winprob-fill" id="wp-fill"></div>
+            </div>
+            <div class="winprob-row">
+              <span class="winprob-team" id="wp-home-name">—</span>
+              <span class="winprob-value" id="wp-home-value">—</span>
+            </div>
+          </div>
+
+          <!-- At bat / Pitching -->
+          <div class="player-grid">
+            <div class="player-box">
+              <div class="player-label">AT BAT</div>
+              <div class="player-name" id="batter-name">—</div>
+              <div class="player-stats" id="batter-stats"></div>
+            </div>
+            <div class="player-box">
+              <div class="player-label">PITCHING</div>
+              <div class="player-name" id="pitcher-name">—</div>
+              <div class="player-stats" id="pitcher-stats"></div>
+            </div>
+          </div>
+
+          <!-- Last play -->
+          <div class="last-play" id="last-play"></div>
+
+        </div><!-- /situation-panel -->
+
+        <!-- Linescore -->
+        <div class="linescore-wrap" id="linescore-wrap" hidden>
+          <table class="linescore" id="linescore-table">
+            <thead><tr id="linescore-head"></tr></thead>
+            <tbody id="linescore-body"></tbody>
+          </table>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- =================== PLAY-BY-PLAY =================== -->
+    <section class="pbp-section" id="pbp-section" hidden>
+      <div class="section-title">
+        <h2>Play-by-Play</h2>
+        <button class="refresh-btn" id="pbp-refresh" aria-label="Refresh">↻</button>
+      </div>
+      <ol class="pbp-list" id="pbp-list"></ol>
+    </section>
+
+    <!-- =================== SCHEDULE =================== -->
+    <section class="schedule-section">
+      <div class="section-title">
+        <h2>Schedule</h2>
+        <div class="seg-control">
+          <button class="seg-btn active" data-view="upcoming">Upcoming</button>
+          <button class="seg-btn" data-view="recent">Recent</button>
+        </div>
+      </div>
+      <div class="schedule-list" id="schedule-list">
+        <div class="schedule-loading">Loading…</div>
+      </div>
+    </section>
+
+    <footer class="app-footer">
+      <p>Data: ESPN • Last update <span id="last-update">—</span></p>
+      <p class="fine">Not affiliated with Texas A&amp;M University or ESPN.</p>
+    </footer>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
