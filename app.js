@@ -26,6 +26,26 @@ let scheduleView = ‘upcoming’;
 let lastPbpKey = ‘’;
 
 // —————————————————————
+// On-screen debug log (toggle with ?debug=1)
+// —————————————————————
+const DEBUG = new URLSearchParams(location.search).has(‘debug’);
+function debug(msg) {
+if (!DEBUG) return;
+let panel = document.getElementById(‘debug-panel’);
+if (!panel) {
+panel = document.createElement(‘div’);
+panel.id = ‘debug-panel’;
+panel.style.cssText = ‘position:fixed;bottom:0;left:0;right:0;max-height:40vh;overflow:auto;background:#000;color:#0f0;font:11px/1.4 monospace;padding:8px;z-index:9999;border-top:2px solid #0f0;white-space:pre-wrap;word-break:break-all;’;
+document.body.appendChild(panel);
+}
+const line = document.createElement(‘div’);
+line.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+panel.appendChild(line);
+panel.scrollTop = panel.scrollHeight;
+console.log(msg);
+}
+
+// —————————————————————
 // Fetch helpers
 // —————————————————————
 async function fetchJSON(u, label) {
@@ -46,28 +66,40 @@ const day = String(d.getDate()).padStart(2, ‘0’);
 return `${y}${m}${day}`;
 }
 
-// ESPN’s scoreboard endpoint accepts a single date (?dates=YYYYMMDD).
-// Scan a sliding window of recent + upcoming days and collect every A&M event.
-// This is the same pattern diamondcollegebaseball.com uses.
+// Throttled fetch: process days in small batches to avoid rate limits.
 async function fetchAggieEvents() {
 const today = new Date();
 const days = [];
-// 14 days back through 14 days ahead = 29 days (limits parallel requests)
 for (let i = -14; i <= 14; i++) {
 const d = new Date(today);
 d.setDate(today.getDate() + i);
 days.push(d);
 }
 
-const fetches = days.map((d) =>
+debug(`Fetching ${days.length} days from ESPN…`);
+const BATCH = 5;
+const results = [];
+let okCount = 0, failCount = 0;
+
+for (let i = 0; i < days.length; i += BATCH) {
+const batch = days.slice(i, i + BATCH);
+const batchResults = await Promise.all(batch.map((d) =>
 fetchJSON(url(`/scoreboard?dates=${yyyymmdd(d)}`), `scoreboard ${yyyymmdd(d)}`)
+.then((r) => { okCount++; return r; })
 .catch((err) => {
+failCount++;
 console.warn(‘Day fetch failed’, yyyymmdd(d), err.message);
 return null;
 })
-);
-
-const results = await Promise.all(fetches);
+));
+results.push(…batchResults);
+// Update card while we work
+const el = document.getElementById(‘card-loading’);
+if (el && !el.hidden) {
+el.textContent = `Loading game data… ${okCount + failCount}/${days.length}`;
+}
+}
+debug(`Done. ok=${okCount} fail=${failCount}`);
 
 // Flatten + dedupe by event ID
 const seen = new Set();
@@ -89,6 +121,7 @@ events.push(ev);
 }
 }
 }
+debug(`Aggie games found: ${events.length}`);
 return events;
 }
 
@@ -396,14 +429,16 @@ return ‘’;
 // —————————————————————
 async function tick() {
 try {
+debug(‘tick start’);
 console.log(’[tick] start’);
 const events = eventCache || await fetchAggieEvents();
 eventCache = events;
+debug(`tick events=${events.length}`);
 console.log(’[tick] got events:’, events.length);
 
 ```
 try { renderSchedule(events); }
-catch (e) { console.error('[renderSchedule failed]', e); }
+catch (e) { console.error('[renderSchedule failed]', e); debug('renderSchedule failed: ' + e.message); }
 
 if (!events.length) {
   $('card-loading').textContent = 'No Texas A&M games found in the current window.';
@@ -415,6 +450,7 @@ if (!events.length) {
 }
 
 const { game, state } = pickGame(events);
+debug(`picked game=${game?.id} state=${state}`);
 console.log('[tick] picked game', game?.id, 'state', state);
 if (!game) {
   setStatus('IDLE', '');
@@ -424,11 +460,12 @@ if (!game) {
 
 let summary = null;
 if (state === 'in' || state === 'post') {
-  try { summary = await fetchSummary(game.id); } catch (e) { console.warn('summary fetch failed', e); }
+  try { summary = await fetchSummary(game.id); }
+  catch (e) { debug('summary failed: ' + e.message); console.warn('summary fetch failed', e); }
 }
 const liveComp = summary?.header?.competitions?.[0] || game.competitions?.[0];
 if (!liveComp) {
-  console.error('[tick] no competition data for game', game.id);
+  debug('no competition data');
   setError('No competition data on selected event.');
   reschedule(POLL_IDLE);
   return;
@@ -436,6 +473,7 @@ if (!liveComp) {
 
 try { renderGame(liveComp, summary, state); }
 catch (e) {
+  debug('renderGame failed: ' + e.message);
   console.error('[renderGame failed]', e);
   setError('Render failed: ' + (e.message || e));
   reschedule(POLL_IDLE);
@@ -451,11 +489,16 @@ reschedule(state === 'in' ? POLL_LIVE : POLL_IDLE);
 ```
 
 } catch (err) {
+debug(’FATAL: ’ + (err.message || err));
 setStatus(‘OFFLINE’, ‘’);
 setError(err.message || String(err));
 reschedule(POLL_IDLE);
 }
 }
+
+// Catch any errors that escape (promise rejections, etc.)
+window.addEventListener(‘error’, (e) => debug(’window error: ’ + e.message));
+window.addEventListener(‘unhandledrejection’, (e) => debug(’unhandled rejection: ’ + (e.reason?.message || e.reason)));
 
 function reschedule(ms) {
 clearTimeout(timer);
