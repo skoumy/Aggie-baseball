@@ -1,0 +1,113 @@
+/* =============================================================
+   Texas A&M Baseball — mobile-app style
+   ============================================================= */
+
+:root {
+  --maroon: #500000;
+  --maroon-dark: #3a0000;
+  --maroon-light: #6b0000;
+  --bg: #0e0606;
+  --bg-2: #1a0808;
+  --card: #1f0a0a;
+  --card-2: #2a0e0e;
+  --ink: #fdf5e6;
+  --ink-2: #e8d9be;
+  --muted: #a08a78;
+  --muted-2: #7a6557;
+  --gold: #e8b54a;
+  --gold-dim: #b8893a;
+  --green: #4ade80;
+  --red: #ef4444;
+  --line: rgba(253, 245, 230, 0.08);
+  --line-2: rgba(253, 245, 230, 0.14);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+html, body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 16px;
+  min-height: 100vh;
+  min-height: 100dvh;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  background:
+    radial-gradient(800px 400px at 50% -100px, rgba(80, 0, 0, 0.6), transparent 70%),
+    linear-gradient(180deg, #0e0606 0%, #060202 100%);
+  background-attachment: fixed;
+}
+
+/* =================== HEADER =================== */
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: rgba(14, 6, 6, 0.85);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border-bottom: 1px solid var(--line);
+  padding-top: env(safe-area-inset-top);
+}
+
+.header-inner {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 14px 18px;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 12px;
+}
+
+.team-badge {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: linear-gradient(140deg, var(--maroon-light), var(--maroon));
+  border: 1.5px solid var(--gold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  box-shadow: 0 4px 14px rgba(80, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  flex-shrink: 0;
+}
+
+.badge-letter {
+  font-family: 'Inter', sans-serif;
+  font-weight: 800;
+  font-size: 14px;
+  color: var(--ink);
+  letter-spacing: -0.02em;
+}
+.badge-letter.mid { font-size: 16px; color: var(--gold); }
+
+.app-title {
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--line-2);
+  border-radius: 999px;
+  font-family: 'Roboto Mono', monospace;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+}
+
+.status-pill .dot {
+  width: 6​​​​​​​​​​​​​​​​
