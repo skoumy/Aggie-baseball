@@ -9,8 +9,7 @@ const TEAM_RX = /texas\s*a\s*&\s*m|aggies/i;
 // We require “texas” OR the school’s specific abbreviation “TA&M”/“TAMU”.
 const STRONG_RX = /texas\s*a\s*&\s*m|^ta&m$|^tamu$/i;
 
-const ESPN_SITE = ‘https://site.api.espn.com/apis/site/v2/sports/baseball/college-baseball’;
-
+const ESPN_SITE = 'https://site.api.espn.com/apis/site/v2/sports/baseball/college-baseball'; 
 const POLL_LIVE = 15_000;
 const POLL_IDLE = 120_000;
 
